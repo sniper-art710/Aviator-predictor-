@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Aviator Predictor Access</title>
+  <style>
+    body {
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: white;
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      color: #00ffcc;
+    }
+    p {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      text-align: center;
+      max-width: 500px;
+    }
+    input {
+      padding: 12px;
+      margin: 10px;
+      width: 300px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    button {
+      padding: 12px 24px;
+      margin-top: 20px;
+      background-color: #00ffcc;
+      color: #003333;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #00ccaa;
+    }
+    .error {
+      margin-top: 10px;
+      color: #ff4d4d;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Welcome to Aviator Predictor</h1>
+  <p>Secure Access Panel - Only Authorized Administrators can enter and access the Predictor tool.</p>
+
+  <input type="text" id="adminName" placeholder="Enter Administrator ID ">
+  <input type="text" id="licenseKey" placeholder="Enter License Key">
+  <button onclick="verifyAccess()">Access Aviator Predictor</button>
+
+  <div class="error" id="error"></div>
+
+  <script>
+    // Predefined valid admin IDs
+    const validAdmins = ["001", "002", "003", "004", "005"];
+
+    function verifyAccess() {
+      const adminName = document.getElementById('adminName').value.trim();
+      const licenseKey = document.getElementById('licenseKey').value.trim();
+      const errorDiv = document.getElementById('error');
+
+      if (!validAdmins.includes(adminName)) {
+        errorDiv.textContent = "Invalid Administrator ID.";
+        return;
+      }
+
+      if (licenseKey.length < 8) { // Simple check for now
+        errorDiv.textContent = "Invalid License Key Contact Administrator.";
+        return;
+      }
+
+      // If everything is correct
+      errorDiv.textContent = "";
+      window.open('https://huggingface.co/spaces/Ntsak23/aviator-predictor');
+    }
+  </script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
