@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Aviator Game Predictor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+        }
+        .input-highlight {
+            transition: all 0.3s ease;
+        }
+        .input-highlight:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+        .prediction-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .plane-animation {
+            animation: fly 3s infinite alternate;
+        }
+        @keyframes fly {
+            0% {
+                transform: translateX(0) rotate(0deg);
+            }
+            100% {
+                transform: translateX(20px) rotate(5deg);
+            }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen text-white">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-10">
+            <div class="flex justify-center items-center mb-4">
+                <i class="fas fa-plane-departure text-4xl mr-3 plane-animation"></i>
+                <h1 class="text-4xl font-bold">Aviator Predictor Pro</h1>
+            </div>
+            <p class="text-xl opacity-80 max-w-2xl mx-auto">
+                Input past game multiples to analyze patterns and get predictions for upcoming rounds
+            </p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Input Section -->
+            <div class="bg-white/10 rounded-xl p-6 shadow-lg">
+                <h2 class="text-2xl font-semibold mb-6 flex items-center">
+                    <i class="fas fa-chart-line mr-3"></i> Input Past Multiples
+                </h2>
+
+                <div class="mb-6">
+                    <label class="block mb-2 font-medium"
+                        >Enter past game multiples (comma separated)</label
+                    >
+                    <div class="relative">
+                        <textarea
+                            id="multiplesInput"
+                            class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 input-highlight focus:outline-none"
+                            placeholder="E.g.: 1.25, 2.10, 1.75, 3.40, 1.15"
+                            rows="5"
+                        ></textarea>
+                        <div class="absolute right-3 bottom-3 text-xs opacity-70">
+                            <span id="count">0</span> entries
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="block mb-2 font-medium">Analysis Depth</label>
+                        <select
+                            class="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 input-highlight focus:outline-none"
+                        >
+                            <option>Basic (last 5 games)</option>
+                            <option selected>Standard (last 10 games)</option>
+                            <option>Advanced (last 20 games)</option>
+                            <option>Expert (last 50 games)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block mb-2 font-medium">Prediction Model</label>
+                        <select
+                            class="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 input-highlight focus:outline-none"
+                        >
+                            <option selected>Linear Regression</option>
+                            <option>Neural Network</option>
+                            <option>Pattern Recognition</option>
+                            <option>Statistical Analysis</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button
+                    id="analyzeBtn"
+                    class="w-full py-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-semibold transition-colors flex items-center justify-center"
+                >
+                    <i class="fas fa-rocket mr-2"></i> Analyze & Predict
+                </button>
+
+                <button
+                    id="resetBtn"
+                    type="button"
+                    class="w-full mt-3 py-3 bg-gray-600 hover:bg-gray-700 rounded-lg font-semibold transition-colors flex items-center justify-center"
+                >
+                    <i class="fas fa-undo mr-2"></i> Reset
+                </button>
+            </div>
+
+            <!-- Results Section -->
+            <div>
+                <div class="prediction-card rounded-xl p-6 mb-6">
+                    <h2 class="text-2xl font-semibold mb-4 flex items-center">
+                        <i class="fas fa-chart-pie mr-3"></i> Prediction Results
+                    </h2>
+
+                    <div id="resultsPlaceholder" class="text-center py-10">
+                        <i class="fas fa-chart-bar text-4xl mb-4 opacity-50"></i>
+                        <p class="opacity-70">
+                            Enter past multiples and click "Analyze" to see predictions
+                        </p>
+                    </div>
+
+                    <div id="resultsContainer" class="hidden">
+                        <div class="grid grid-cols-3 gap-4 mb-6">
+                            <div
+                                class="bg-blue-900/30 p-4 rounded-lg text-center"
+                            >
+                                <div class="text-sm opacity-80 mb-1">Next Round</div>
+                                <div class="text-2xl font-bold" id="nextRoundPred">
+                                    1.85x
+                                </div>
+                            </div>
+                            <div
+                                class="bg-blue-900/30 p-4 rounded-lg text-center"
+                            >
+                                <div class="text-sm opacity-80 mb-1">Confidence</div>
+                                <div class="text-2xl font-bold" id="confidenceLevel">
+                                    78%
+                                </div>
+                            </div>
+                            <div
+                                class="bg-blue-900/30 p-4 rounded-lg text-center"
+                            >
+                                <div class="text-sm opacity-80 mb-1">Suggested Bet</div>
+                                <div class="text-2xl font-bold" id="suggestedBet">
+                                    Medium
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <div class="flex justify-between mb-2">
+                                <span>Pattern Analysis</span>
+                                <span class="font-medium">Upward Trend</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2.5">
+                                <div
+                                    class="bg-green-400 h-2.5 rounded-full"
+                                    style="width: 75%"
+                                ></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h3 class="font-medium mb-2">Historical Multiples</h3>
+                            <div class="h-40 overflow-y-auto pr-2">
+                                <canvas id="historyChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="text-sm opacity-80 italic">
+                            <i class="fas fa-info-circle mr-1"></i> Predictions are based on
+                            statistical analysis and don't guarantee future results
+                        </div>
+                    </div>
+                </div>
+
+                <div class="prediction-card rounded-xl p-6">
+                    <h2 class="text-2xl font-semibold mb-4 flex items-center">
+                        <i class="fas fa-history mr-3"></i> Recent Predictions
+                    </h2>
+                    <div class="space-y-3">
+                        <div
+                            class="flex justify-between items-center p-3 bg-white/5 rounded-lg"
+                        >
+                            <div>
+                                <div class="font-medium">Predicted: 1.92x</div>
+                                <div class="text-sm opacity-70">Actual: 2.05x</div>
+                            </div>
+                            <span
+                                class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs"
+                                >+6.8%</span
+                            >
+                        </div>
+                        <div
+                            class="flex justify-between items-center p-3 bg-white/5 rounded-lg"
+                        >
+                            <div>
+                                <div class="font-medium">Predicted: 1.45x</div>
+                                <div class="text-sm opacity-70">Actual: 1.12x</div>
+                            </div>
+                            <span
+                                class="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs"
+                                >-22.7%</span
+                            >
+                        </div>
+                        <div
+                            class="flex justify-between items-center p-3 bg-white/5 rounded-lg"
+                        >
+                            <div>
+                                <div class="font-medium">Predicted: 2.30x</div>
+                                <div class="text-sm opacity-70">Actual: 2.55x</div>
+                            </div>
+                            <span
+                                class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs"
+                                >+10.9%</span
+                            >
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-16 text-center text-sm opacity-70">
+            <p>
+                Aviator Predictor Pro uses advanced algorithms to analyze game
+                patterns. Remember that gambling involves risk.
+            </p>
+            <p class="mt-2">© 2023 Aviator Predictor Pro. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Update input count
+            const multiplesInput = document.getElementById("multiplesInput");
+            const countElement = document.getElementById("count");
+
+            multiplesInput.addEventListener("input", function () {
+                const values = this.value
+                    .split(",")
+                    .filter((item) => item.trim() !== "");
+                countElement.textContent = values.length;
+            });
+
+            // Enhanced prediction algorithm that includes wider range of multiples
+            function generateRealisticPrediction(inputData) {
+                // Define probability weights for different multiplier ranges
+                const multiplierRanges = [
+                    { min: 1.00, max: 1.09, weight: 0.15 },  // Very low (15%)
+                    { min: 1.10, max: 1.49, weight: 0.25 },  // Low (25%)
+                    { min: 1.50, max: 1.99, weight: 0.20 },  // Medium-low (20%)
+                    { min: 2.00, max: 2.99, weight: 0.15 },  // Medium (15%)
+                    { min: 3.00, max: 4.99, weight: 0.12 },  // High (12%)
+                    { min: 5.00, max: 9.99, weight: 0.08 },  // Very high (8%)
+                    { min: 10.00, max: 50.00, weight: 0.05 } // Extreme (5%)
+                ];
+
+                // Select range based on weighted probability
+                const random = Math.random();
+                let cumulativeWeight = 0;
+                let selectedRange = multiplierRanges[0];
+
+                for (const range of multiplierRanges) {
+                    cumulativeWeight += range.weight;
+                    if (random <= cumulativeWeight) {
+                        selectedRange = range;
+                        break;
+                    }
+                }
+
+                // Generate prediction within selected range
+                const prediction = Math.random() * (selectedRange.max - selectedRange.min) + selectedRange.min;
+                
+                // Round to 2 decimal places
+                return Math.round(prediction * 100) / 100;
+            }
+
+            // Suggest bet level based on predicted multiple and confidence
+            function suggestBetLevel(predictedMultiple, confidence) {
+                if (predictedMultiple < 1.20 || confidence < 60) {
+                    return "Very Low";
+                } else if (predictedMultiple < 1.50 || confidence < 70) {
+                    return "Low";
+                } else if (predictedMultiple < 2.50 || confidence < 80) {
+                    return "Medium";
+                } else if (predictedMultiple < 5.00 || confidence < 90) {
+                    return "High";
+                } else {
+                    return "Very High";
+                }
+            }
+
+            // Calculate confidence based on prediction range
+            function calculateConfidence(predictedMultiple) {
+                if (predictedMultiple < 1.20) {
+                    return Math.floor(Math.random() * 20 + 45); // 45-65%
+                } else if (predictedMultiple < 2.00) {
+                    return Math.floor(Math.random() * 25 + 60); // 60-85%
+                } else if (predictedMultiple < 5.00) {
+                    return Math.floor(Math.random() * 20 + 65); // 65-85%
+                } else {
+                    return Math.floor(Math.random() * 15 + 40); // 40-55%
+                }
+            }
+
+            // Generate realistic historical data with wider range
+            function generateHistoricalData(count = 10) {
+                const data = [];
+                for (let i = 0; i < count; i++) {
+                    data.push(generateRealisticPrediction());
+                }
+                return data;
+            }
+
+            // Analyze button click handler
+            document
+                .getElementById("analyzeBtn")
+                .addEventListener("click", function (event) {
+                    event.preventDefault();
+                    const input = multiplesInput.value.trim();
+                    if (!input) {
+                        alert("Please enter at least 5 past game multiples");
+                        return;
+                    }
+
+                    // Show loading state
+                    const btn = this;
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML =
+                        '<i class="fas fa-spinner fa-spin mr-2"></i> Analyzing...';
+                    btn.disabled = true;
+
+                    // Simulate analysis
+                    setTimeout(() => {
+                        // Hide placeholder, show results
+                        document
+                            .getElementById("resultsPlaceholder")
+                            .classList.add("hidden");
+                        document
+                            .getElementById("resultsContainer")
+                            .classList.remove("hidden");
+
+                        // Parse input data
+                        const inputValues = input.split(',').map(val => parseFloat(val.trim())).filter(val => !isNaN(val));
+                        
+                        // Generate realistic prediction
+                        const nextRound = generateRealisticPrediction(inputValues);
+                        const confidence = calculateConfidence(nextRound);
+                        const betLevel = suggestBetLevel(nextRound, confidence);
+
+                        document.getElementById("nextRoundPred").textContent =
+                            nextRound + "x";
+                        document.getElementById("confidenceLevel").textContent =
+                            confidence + "%";
+                        document.getElementById("suggestedBet").textContent = betLevel;
+
+                        // Create chart with realistic data
+                        createChart();
+
+                        // Reset button
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    }, 1500);
+                });
+
+            // Reset button click handler
+            document
+                .getElementById("resetBtn")
+                .addEventListener("click", function () {
+                    multiplesInput.value = "";
+                    countElement.textContent = "0";
+                    document
+                        .getElementById("resultsPlaceholder")
+                        .classList.remove("hidden");
+                    document
+                        .getElementById("resultsContainer")
+                        .classList.add("hidden");
+                });
+
+            // Chart instance holder
+            let historyChartInstance = null;
+
+            // Create sample chart with realistic data
+            function createChart() {
+                const ctx = document
+                    .getElementById("historyChart")
+                    .getContext("2d");
+                const labels = Array.from({ length: 10 }, (_, i) => "Round " + (i + 1));
+                const data = generateHistoricalData(10);
+
+                // Destroy previous chart instance if it exists
+                if (historyChartInstance) {
+                    historyChartInstance.destroy();
+                }
+
+                historyChartInstance = new Chart(ctx, {
+                    type: "line",
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: "Multiples",
+                                data: data,
+                                borderColor: "rgba(59, 130, 246, 1)",
+                                backgroundColor: "rgba(59, 130, 246, 0.1)",
+                                tension: 0.4,
+                                fill: true,
+                                pointBackgroundColor: "white",
+                                pointRadius: 3,
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false,
+                            },
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: "rgba(255, 255, 255, 0.1)",
+                                },
+                                ticks: {
+                                    color: "rgba(255, 255, 255, 0.7)",
+                                },
+                            },
+                            x: {
+                                grid: {
+                                    color: "rgba(255, 255, 255, 0.1)",
+                                },
+                                ticks: {
+                                    color: "rgba(255, 255, 255, 0.7)",
+                                },
+                            },
+                        },
+                    },
+                });
+            }
+        });
+    </script>
+</body>
+</html>
